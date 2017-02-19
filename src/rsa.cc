@@ -1,5 +1,9 @@
 #include<vector>
 #include<string>
+#include<thread>
+#include<condition_variable>
+#include<mutex>
+#include<atomic>
 using namespace std;
 
 int lcm(int a, int b) 
@@ -22,8 +26,8 @@ static union {
 	unsigned char c[4];
 } u;
 
-vector<unsigned int> stovi(string s)
-{
+vector<unsigned int> stovi(string s)//read characters as uint
+{//just use 3 character to be inside of long limit when go exponetial
 	vector<unsigned int> v;
 	const char* p = s.data();
 	while(s.size() % 3) s += ' ';
@@ -36,9 +40,32 @@ vector<unsigned int> stovi(string s)
 }
 
 string vitos(unsigned int n)
-{
+{//read unsigned int as characters
 	u.n = n;
 	string s;
 	for(int i=0; i<3; i++) s += u.c[i];
 	return s;
 }
+
+atomic<int> using_cpu {0};
+mutex mtx;
+condition_variable cv;
+void decode(long m, long d, long K, vector<long>& v, int n)
+{
+	static int cpu = thread::hardware_concurrency();
+	unique_lock<mutex> lck{mtx};
+	while(using_cpu >= cpu) cv.wait(lck);
+	if(using_cpu < cpu-1) {
+		using_cpu++;
+		lck.unlock();
+		cv.notify_one();
+		v[n] = code(m, d, K);
+		using_cpu--;
+	} else {
+		using_cpu++;
+		v[n] = code(m, d, K);
+		using_cpu--;
+		cv.notify_one();
+	}
+}
+

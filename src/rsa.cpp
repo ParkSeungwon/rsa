@@ -34,7 +34,14 @@ int main()
 	for(auto& a : stovi(s)) v.push_back(code(a, e, K));
 	for(auto& a : v) cout << "encoded to " << a << ' ';
 	cout << endl << "decoded to ";
-	for(auto& a : v) cout << vitos((code(a, d, K)));
+	vector<long> vl;
+	vl.resize(v.size());
+	thread threads[v.size()];
+	for(int i=0; i<v.size(); i++) 
+		threads[i] = thread(decode, v[i], d, K, ref(vl), i);
+	for(int i=0; i<v.size(); i++) threads[i].join();
+	for(auto& a : vl) cout << vitos(a); 
+//	for(auto& a : v) cout << vitos((code(a, d, K)));
 }
 
 
