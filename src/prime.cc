@@ -19,4 +19,3 @@ template<int N> constexpr Prime<N>::Prime()
 }
 
 template class Prime<5000>;
-

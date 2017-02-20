@@ -11,6 +11,7 @@ void decode(long m, long d, long K, std::vector<long>& v, int n);
 template<int N> class Prime
 {//generate N Prime numbers in compile time
 public:
-	unsigned int arr[N];
+	unsigned int arr[N]{};
 	constexpr Prime();
 };
+
