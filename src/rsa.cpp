@@ -5,7 +5,7 @@
 #include"rsa.h"
 #define M 5000
 using namespace std;
-void f();
+
 int main()
 {//generate rsa key and encode sample
 	const Prime<5000> prime;
@@ -13,6 +13,7 @@ int main()
 	uniform_int_distribution<> di(it - prime.arr, M-1);
 	random_device rd;
 
+	//resolve p, q, K, e, d, phi
 	int p = prime.arr[di(rd)];
 	int q = prime.arr[di(rd)];
 	long K = p * q;
@@ -25,6 +26,7 @@ int main()
 	cout << "p = " << p << ", q = " << q << ", phi = " << phi << endl;
 	cout << "K = " << K << ", e = " << e << " , d = " << d << endl;
 
+	//encode
 	cout << "enter message to encode" << endl;
 	string s;
 	getline(cin, s);
@@ -32,6 +34,7 @@ int main()
 	for(auto& a : stovi(s)) v.push_back(code(a, e, K));
 	for(auto& a : v) cout << a << ' ';
 
+	//decode
 	vector<long> vl;
 	vl.resize(p = v.size());//reuse
 	thread threads[p];
