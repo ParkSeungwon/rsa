@@ -14,8 +14,10 @@ public:
 		cpu = std::thread::hardware_concurrency();
 	}
 	template <typename F> auto add_thread(F f) {//use bind to pass argument
-		auto* prom = new std::promise<typename std::result_of<F&()>::type>;
-		v.push_back({std::thread(&AutoThread::wrap<F, typename std::result_of<F&()>::type>, this, f, std::ref(*prom)), (std::promise<void>*)prom});
+		typedef typename std::result_of<F&()>::type R;
+		auto* prom = new std::promise<R>;
+		v.push_back({std::thread(&AutoThread::wrap<F,R>, this, f, std::ref(*prom)), 
+				(std::promise<void>*)prom});
 		auto fut = prom->get_future();
 		return fut;
 	}
@@ -38,14 +40,14 @@ private:
 		while(using_cpu >= cpu) cv.wait(lck);
 		if(using_cpu < cpu-1) {
 			using_cpu++;
-			std::cout << "using_cpu : " << using_cpu << std::endl;
+//			std::cout << "using_cpu : " << using_cpu << std::endl;
 			lck.unlock();
 			cv.notify_one();
 			prom.set_value(f());
 			using_cpu--;
 		} else {
 			using_cpu++;
-			std::cout << "using_cpu : " << using_cpu << std::endl;
+//			std::cout << "using_cpu : " << using_cpu << std::endl;
 			prom.set_value(f());
 			using_cpu--;
 			lck.unlock();

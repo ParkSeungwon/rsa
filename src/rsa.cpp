@@ -3,6 +3,7 @@
 #include<algorithm>
 #include<thread>
 #include"rsa.h"
+#include"core.h"
 #define M 5000
 using namespace std;
 
@@ -32,15 +33,14 @@ int main()
 	getline(cin, s);
 	vector<long> v;
 	for(auto& a : stovi(s)) v.push_back(code(a, e, K));
-	for(auto& a : v) cout << a << ' ';
+	for(auto& a : v) cout << a << ' '; cout << endl;
 
 	//decode
-	vector<long> vl;
-	vl.resize(p = v.size());//reuse
-	thread threads[p];
-	for(int i=0; i<p; i++) threads[i] = thread(decode, v[i], d, K, ref(vl), i);
-	for(int i=0; i<p; i++) threads[i].join();
-	for(auto& a : vl) cout << vitos(a); 
+	AutoThread at;
+	vector<future<long>> vf;
+	for(int i=0; i<v.size(); i++) vf.push_back(at.add_thread(bind(code, v[i], d, K)));
+	for(int i=0; i<v.size(); i++) cout << vitos(vf[i].get()); cout << endl;
+	//for(auto& a : vl) cout << vitos(a); 
 }
 
 
