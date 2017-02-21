@@ -12,5 +12,6 @@ int main()
 	AutoThread at;
 	auto a = at.add_thread(bind(f, 3));
 	cout << a.get() << endl;
+	decltype(declval(f())) a;
 }
 
