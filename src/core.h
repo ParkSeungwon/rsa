@@ -15,16 +15,19 @@ public:
 	}
 	template <typename F> auto add_thread(F f) {//use bind to pass argument
 		auto* prom = new std::promise<typename std::result_of<F&()>::type>;
-		v.push_back(std::thread(&AutoThread::wrap<F, typename std::result_of<F&()>::type>, this, f, std::ref(*prom)));
+		v.push_back({std::thread(&AutoThread::wrap<F, typename std::result_of<F&()>::type>, this, f, std::ref(*prom)), (std::promise<void>*)prom});
 		auto fut = prom->get_future();
 		return fut;
 	}
 	~AutoThread() {
-		for(auto& a : v) if(a.joinable()) a.join();
+		for(auto& a : v) {
+			if(a.first.joinable()) a.first.join();
+			delete a.second;
+		}
 	}
 
 private:
-	std::vector<std::thread> v;
+	std::vector<std::pair<std::thread, std::promise<void>*>> v;
 	std::mutex mtx;
 	int cpu;
 	std::condition_variable cv;
