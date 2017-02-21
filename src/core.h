@@ -1,3 +1,4 @@
+#pragma once
 #include<functional>
 #include<mutex>
 #include<atomic>
@@ -5,36 +6,52 @@
 #include<vector>
 #include<future>
 #include<condition_variable>
+#include<cstdlib>
+
+struct Any
+{
+	void *data;
+	template <typename T> Any(T n) {
+		data = malloc(sizeof(T));
+		*(T*)data = n;
+	}
+	template <typename T> operator T() {
+		return *(T*)data;
+	}
+	~Any() {
+		if(data) {
+			free(data);
+			data = nullptr;
+		}
+	}
+};
+
 
 class AutoThread
-{
+{//automatically manages threads considering cpu core
 public:
 	AutoThread() {
 		cpu = std::thread::hardware_concurrency();
 	}
 	template <typename F> auto add_thread(F f) {//use bind to pass argument
-		typedef typename std::result_of<F&()>::type R;
-		auto* prom = new std::promise<R>;
-		v.push_back({std::thread(&AutoThread::wrap<F,R>, this, f, std::ref(*prom)), 
-				(std::promise<void>*)prom});
-		auto fut = prom->get_future();
-		return fut;
+		auto prom = std::make_shared<std::promise<Any>>();
+		v.push_back({std::thread(&AutoThread::wrap<F>, this, f, std::ref(*prom)), 
+				prom});//?????
+		return prom->get_future();
 	}
 	~AutoThread() {
 		for(auto& a : v) {
 			a.first.join();
-			delete a.second;
 		}
 	}
 
 private:
-	std::vector<std::pair<std::thread, std::promise<void>*>> v;
+	std::vector<std::pair<std::thread, std::shared_ptr<std::promise<Any>>>> v;
 	std::mutex mtx;
 	int cpu;
 	std::condition_variable cv;
 	std::atomic<int> using_cpu{0};
-	template<typename F, typename R = typename std::result_of<F&()>::type> 
-	void wrap(F f, std::promise<R>& prom) {
+	template<typename F> void wrap(F f, std::promise<Any>& prom) {
 		std::unique_lock<std::mutex> lck{mtx};
 		while(using_cpu >= cpu) cv.wait(lck);
 		if(using_cpu < cpu-1) {

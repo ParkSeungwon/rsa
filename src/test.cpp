@@ -9,8 +9,7 @@ int f(int n) {
 
 int main()
 {
-	AutoThread at;
-	auto a = at.add_thread(bind(f, 3));
-	cout << a.get() << endl;
+	Any a = "abdc";
+	cout << (const char*)a << endl;
 }
 

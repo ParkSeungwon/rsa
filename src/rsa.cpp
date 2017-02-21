@@ -37,9 +37,9 @@ int main()
 
 	//decode
 	AutoThread at;
-	vector<future<long>> vf;//cause code return long
+	vector<future<Any>> vf;//cause code return long
 	for(int i=0; i<v.size(); i++) vf.push_back(at.add_thread(bind(code, v[i], d, K)));
-	for(int i=0; i<v.size(); i++) cout << vitos(vf[i].get()); cout << endl;
+	for(int i=0; i<v.size(); i++) cout << vitos((long)vf[i].get()); cout << endl;
 }
 
 
