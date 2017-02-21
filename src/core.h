@@ -7,7 +7,7 @@
 #include<condition_variable>
 
 class AutoThread
-{
+{//automatic thread considering cpu core
 public:
 	AutoThread() {
 		cpu = std::thread::hardware_concurrency();
@@ -39,14 +39,12 @@ private:
 		while(using_cpu >= cpu) cv.wait(lck);
 		if(using_cpu < cpu-1) {
 			using_cpu++;
-//			std::cout << "using_cpu : " << using_cpu << std::endl;
 			lck.unlock();
 			cv.notify_one();
 			prom.set_value(f());
 			using_cpu--;
 		} else {
 			using_cpu++;
-//			std::cout << "using_cpu : " << using_cpu << std::endl;
 			prom.set_value(f());
 			using_cpu--;
 			lck.unlock();
