@@ -9,8 +9,8 @@ using namespace std;
 
 int main()
 {//generate rsa key and encode sample
-	const Prime<5000> prime;
-	auto it = lower_bound(prime.arr, prime.arr+M, 10000);
+	const Prime<5000> prime;//contains 5000 prime numbers
+	auto it = lower_bound(prime.arr, prime.arr+M, 10000);//select only over 10000
 	uniform_int_distribution<> di(it - prime.arr, M-1);
 	random_device rd;
 
@@ -37,10 +37,9 @@ int main()
 
 	//decode
 	AutoThread at;
-	vector<future<long>> vf;
+	vector<future<long>> vf;//cause code return long
 	for(int i=0; i<v.size(); i++) vf.push_back(at.add_thread(bind(code, v[i], d, K)));
 	for(int i=0; i<v.size(); i++) cout << vitos(vf[i].get()); cout << endl;
-	//for(auto& a : vl) cout << vitos(a); 
 }
 
 

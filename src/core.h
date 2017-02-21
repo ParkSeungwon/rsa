@@ -1,4 +1,3 @@
-#include<memory>
 #include<functional>
 #include<mutex>
 #include<atomic>
@@ -23,7 +22,7 @@ public:
 	}
 	~AutoThread() {
 		for(auto& a : v) {
-			if(a.first.joinable()) a.first.join();
+			a.first.join();
 			delete a.second;
 		}
 	}

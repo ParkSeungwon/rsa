@@ -46,30 +46,3 @@ string vitos(unsigned int n)
 	for(int i=0; i<3; i++) s += u.c[i];
 	return s;
 }
-
-void decode(long m, long d, long K, vector<long>& v, int n)
-{//decode multithread, considering cpu core
-	static atomic<int> using_cpu {0};
-	static mutex mtx;
-	static condition_variable cv;
-	static int cpu = thread::hardware_concurrency();
-
-	unique_lock<mutex> lck{mtx};
-	while(using_cpu >= cpu) cv.wait(lck);
-	if(using_cpu < cpu-1) {
-		using_cpu++;
-		cout << "using_cpu : " << using_cpu << endl;
-		lck.unlock();
-		cv.notify_one();
-		v[n] = code(m, d, K);
-		using_cpu--;
-	} else {
-		using_cpu++;
-		cout << "using_cpu : " << using_cpu << endl;
-		v[n] = code(m, d, K);
-		using_cpu--;
-		lck.unlock();
-		cv.notify_one();
-	}
-}
-
