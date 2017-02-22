@@ -1,3 +1,4 @@
+#pragma once
 #include<functional>
 #include<mutex>
 #include<atomic>
@@ -5,17 +6,10 @@
 #include<vector>
 #include<future>
 #include<condition_variable>
-#include<typeindex>
 
-class Base 
+struct Base { virtual void f(){}; };
+template <typename T> struct Promise : public Base
 {
-public:
-	virtual void f(){};
-};
-
-template <typename T> class Promise : public Base
-{
-public:
 	std::promise<T> prom;
 	virtual std::future<T> get_future() {
 		return prom.get_future();
@@ -35,8 +29,7 @@ public:
 		typedef typename std::result_of<F&()>::type R;
 		Base* prom = new Promise<R>;
 		vt.push_back(std::thread(&AutoThread::wrap<F,R>, this, f, prom));
-		vp.push_back(prom);//?????
-		//std::declval<R>().value();
+		vp.push_back(prom);
 		return dynamic_cast<Promise<R>*>(prom)->get_future();
 	}
 	~AutoThread() {
@@ -54,6 +47,7 @@ private:
 	int cpu;
 	std::condition_variable cv;
 	std::atomic<int> using_cpu{0};
+
 	template<typename F, typename R = typename std::result_of<F&()>::type> 
 	void wrap(F f, Base* prom) {
 		std::unique_lock<std::mutex> lck{mtx};

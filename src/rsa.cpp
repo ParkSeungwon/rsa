@@ -39,7 +39,9 @@ int main()
 	AutoThread at;
 	vector<future<long>> vf;//cause code return long
 	for(int i=0; i<v.size(); i++) vf.push_back(at.add_thread(bind(code, v[i], d, K)));
+	future<int> f = at.add_thread(bind(lcm, 323,424234));
 	for(int i=0; i<v.size(); i++) cout << vitos(vf[i].get()); cout << endl;
+	cout << f.get() << endl;
 }
 
 
