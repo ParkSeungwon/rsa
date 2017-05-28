@@ -7,7 +7,7 @@
 #include<future>
 #include<condition_variable>
 
-struct Base { virtual void f(){}; };
+struct Base { virtual void blank(){}; };
 template <typename T> struct Promise : public Base
 {
 	std::promise<T> prom;
@@ -26,13 +26,13 @@ public:
 		cpu = std::thread::hardware_concurrency();
 	}
 	template <typename F> auto add_thread(F f) {//use bind to pass argument
-		typedef typename std::result_of<F&()>::type R;
+		typedef typename std::result_of<F&()>::type R;//return type of F
 		Base* prom = new Promise<R>;
 		vt.push_back(std::thread(&AutoThread::wrap<F,R>, this, f, prom));
 		vp.push_back(prom);
 		return dynamic_cast<Promise<R>*>(prom)->get_future();
 	}
-	~AutoThread() {
+	virtual ~AutoThread() {
 		for(auto& a : vt) a.join();
 		for(auto& a : vp) delete a;
 	}
@@ -40,11 +40,13 @@ public:
 		cpu -= n;
 	}
 
-private:
+protected:
 	std::vector<std::thread> vt;
 	std::vector<Base*> vp;
-	std::mutex mtx;
 	int cpu;
+
+private:
+	std::mutex mtx;
 	std::condition_variable cv;
 	std::atomic<int> using_cpu{0};
 
