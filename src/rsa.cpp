@@ -23,7 +23,7 @@ int main()
 	for(i=di(rd); phi % prime.arr[i] == 0; i++);
 	int e = prime.arr[i];
 	for(i=1; (phi * i + 1) % e; i++);
-	long d = (phi * i + 1) / e;
+	long d = (phi * i + 1) / e;//de % phi = 1
 	cout << "p = " << p << ", q = " << q << ", phi = " << phi << endl;
 	cout << "K = " << K << ", e = " << e << " , d = " << d << endl;
 
