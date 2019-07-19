@@ -6,7 +6,8 @@
 #define M 5000
 using namespace std;
 
-int main()
+vector<int> primitive(int);
+int main(int ac, char** av)
 {//generate rsa key and encode sample
 	const Prime<5000> prime;
 	auto it = lower_bound(prime.arr, prime.arr+M, 10000);
@@ -41,6 +42,10 @@ int main()
 	for(int i=0; i<p; i++) threads[i] = thread(decode, v[i], d, K, ref(vl), i);
 	for(int i=0; i<p; i++) threads[i].join();
 	for(auto& a : vl) cout << vitos(a); 
+
+	cout << endl;
+	for(auto i : primitive(atoi(av[1]))) cout << i << ',';
+	cout << endl;
 }
 
 
